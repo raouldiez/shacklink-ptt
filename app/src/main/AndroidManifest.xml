@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:label="@string/app_name" android:icon="@android:drawable/ic_btn_speak_now"
+        android:allowBackup="false">
+
+        <!-- Opened once after install (Android ignores apps that were never opened), and for testing. -->
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Declared here, in the manifest, so Sonim's key service delivers the PTT key to us
+             (it only sends it to apps that declare a receiver for these actions). -->
+        <receiver android:name=".PttReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="com.sonim.intent.action.PTT_KEY_DOWN" />
+                <action android:name="com.sonim.intent.action.PTT_KEY_UP" />
+                <action android:name="android.intent.action.PTT.down" />
+                <action android:name="android.intent.action.PTT.up" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Our own safety timer: un-keys Mumla if a key-up is ever lost. Not exported. -->
+        <receiver android:name=".PttReceiver$Failsafe" android:exported="false" />
+    </application>
+</manifest>
