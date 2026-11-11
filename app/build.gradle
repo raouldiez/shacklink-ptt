@@ -1,4 +1,8 @@
 plugins { id 'com.android.application' }
+// Every build is signed with the same key (app/shacklink.jks), so a new APK installs over the old
+// one and the app can update itself. The key lives in this public repo by choice: it only proves
+// "built from this repo"; Android still asks before installing anything.
+def run = (System.getenv('GITHUB_RUN_NUMBER') ?: '0') as int
 android {
     namespace 'org.shacklink.pttbridge'
     compileSdk 34
@@ -6,8 +10,19 @@ android {
         applicationId 'org.shacklink.pttbridge'
         minSdk 26
         targetSdk 34
-        versionCode 3
-        versionName '1.2'
+        versionCode 100 + run          // grows with every CI build; the updater compares this
+        versionName "1.3." + run
+    }
+    signingConfigs {
+        shared {
+            storeFile file('shacklink.jks')
+            storePassword '000e86d3b16accd78c4c1ec2efb22dba'
+            keyAlias 'shacklink'
+            keyPassword '000e86d3b16accd78c4c1ec2efb22dba'
+        }
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.shared }
     }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
 }

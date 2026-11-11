@@ -20,3 +20,10 @@ the CTR2-MIDI's 3.5 mm key jack sends note 20 (press = on, release = off); that 
 like holding the floating button, and the button turns red while you talk. Unplugging the controller
 while keyed un-keys at once, and the same 3-minute limit applies. ShackLink in Chrome keeps using the
 controller's knobs at the same time.
+
+## Updating
+
+Open ShackLink PTT and tap **Check for update**. It downloads the latest build from this repo's
+release and opens Android's own "update this app?" prompt; the first time Android asks to allow
+"Install unknown apps" for ShackLink PTT. Every build is signed with the same key (`app/shacklink.jks`),
+so updates install over the existing app and keep its settings.
