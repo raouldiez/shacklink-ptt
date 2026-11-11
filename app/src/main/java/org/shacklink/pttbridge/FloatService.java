@@ -40,6 +40,7 @@ public class FloatService extends Service {
     private WindowManager.LayoutParams lp;
     private TextView button;
     private boolean keyed = false;
+    private MidiPtt midi;                                       // CTR2-MIDI PTT jack (USB MIDI)
 
     static boolean running = false;
 
@@ -191,10 +192,19 @@ public class FloatService extends Service {
 
         wm.addView(root, lp);
         MainActivity.note(this, "Floating PTT button shown");
+
+        // A USB MIDI controller's PTT switch (CTR2-MIDI key jack) keys exactly like holding the button.
+        midi = new MidiPtt(this, down -> {
+            if (down == keyed) return;
+            keyed = down; paint();
+            PttReceiver.talk(this, down);
+        });
+        midi.start();
     }
 
     @Override
     public void onDestroy() {
+        if (midi != null) { midi.stop(); midi = null; }
         if (keyed) { keyed = false; PttReceiver.talk(this, false); }   // never leave Mumla keyed
         if (root != null && wm != null) {
             try { wm.removeView(root); } catch (Exception ignored) {}
