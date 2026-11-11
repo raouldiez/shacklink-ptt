@@ -20,6 +20,7 @@ import java.util.Locale;
 public class MainActivity extends Activity {
     private TextView log;
     private Button floatBtn;
+    private Button updBtn;
 
     static void note(Context ctx, String msg) {
         SharedPreferences p = ctx.getSharedPreferences("log", MODE_PRIVATE);
@@ -58,12 +59,19 @@ public class MainActivity extends Activity {
             }
             return true;
         });
+        updBtn = new Button(this);
+        updBtn.setText("Check for update");
+        updBtn.setOnClickListener(x -> {
+            updBtn.setEnabled(false);
+            Updater.check(this, true, (msg, newer) -> { updBtn.setText(msg); updBtn.setEnabled(true); });
+        });
         log = new TextView(this);
         log.setTextSize(13);
         log.setPadding(0, 32, 0, 0);
         v.addView(help);
         v.addView(floatBtn);
         v.addView(test);
+        v.addView(updBtn);
         v.addView(log);
         setContentView(v);
     }
@@ -82,7 +90,11 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onResume() { super.onResume(); refresh(); }
+    protected void onResume() {
+        super.onResume(); refresh();
+        // quietly look for a newer build; tapping the button then installs it
+        Updater.check(this, false, (msg, newer) -> updBtn.setText(newer ? msg + " - tap to update" : "Check for update"));
+    }
 
     private void refresh() {
         floatBtn.setText(FloatService.running ? "Hide floating PTT button" : "Show floating PTT button");

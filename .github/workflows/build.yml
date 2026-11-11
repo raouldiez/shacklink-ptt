@@ -22,4 +22,4 @@ jobs:
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
           gh release delete latest -y --cleanup-tag || true
-          gh release create latest ShackLink-PTT.apk --title "ShackLink PTT (latest build)" --notes "Built from ${GITHUB_SHA::7}. Install on the Sonim, open it once, then Settings > Programmable Keys > Select PTT Key App > ShackLink PTT."
+          gh release create latest ShackLink-PTT.apk --title "ShackLink PTT (latest build)" --notes "Built from ${GITHUB_SHA::7}, versionCode=$((100 + GITHUB_RUN_NUMBER)). In the app: Check for update. First install: open it once; Sonim: Settings > Programmable Keys > Select PTT Key App > ShackLink PTT."
