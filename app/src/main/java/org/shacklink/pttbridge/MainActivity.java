@@ -44,7 +44,8 @@ public class MainActivity extends Activity {
                 + "3. Hold the PTT key: Mumla transmits in the background.\n\n"
                 + "Releasing the key un-keys; a 3-minute limit un-keys if a release is ever missed.\n\n"
                 + "No PTT key (e.g. Z Fold)? Use the floating PTT button: drag it by the grip on top, "
-                + "hold the round button to talk.\n");
+                + "hold the round button to talk.\n\n"
+                + "CTR2-MIDI plugged in? While the floating button is shown, its PTT jack (note 20) keys Mumla too.\n");
         floatBtn = new Button(this);
         floatBtn.setOnClickListener(x -> toggleFloat());
         Button test = new Button(this);
