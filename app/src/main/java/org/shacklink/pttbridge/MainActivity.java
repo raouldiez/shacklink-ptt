@@ -21,6 +21,7 @@ public class MainActivity extends Activity {
     private TextView log;
     private Button floatBtn;
     private Button updBtn;
+    private Button budsBtn;
 
     static void note(Context ctx, String msg) {
         SharedPreferences p = ctx.getSharedPreferences("log", MODE_PRIVATE);
@@ -46,9 +47,18 @@ public class MainActivity extends Activity {
                 + "Releasing the key un-keys; a 3-minute limit un-keys if a release is ever missed.\n\n"
                 + "No PTT key (e.g. Z Fold)? Use the floating PTT button: drag it by the grip on top, "
                 + "hold the round button to talk.\n\n"
-                + "CTR2-MIDI plugged in? While the floating button is shown, its PTT jack (note 20) keys Mumla too.\n");
+                + "CTR2-MIDI plugged in? While the floating button is shown, its PTT jack (note 20) keys Mumla too.\n\n"
+                + "Earbud tap PTT (Galaxy Buds etc.): turn it on below. While the floating button is shown, "
+                + "one tap = TX on, next tap = TX off, double tap = always TX off.\n");
         floatBtn = new Button(this);
         floatBtn.setOnClickListener(x -> toggleFloat());
+        budsBtn = new Button(this);
+        budsBtn.setOnClickListener(x -> {
+            SharedPreferences fp = getSharedPreferences("float", MODE_PRIVATE);
+            fp.edit().putBoolean("buds", !fp.getBoolean("buds", false)).apply();
+            if (FloatService.running) { FloatService.stop(this); FloatService.start(this); }  // apply now
+            budsBtn.postDelayed(this::refresh, 300);
+        });
         Button test = new Button(this);
         test.setText("Hold to test (keys Mumla)");
         test.setOnTouchListener((btn, e) -> {
@@ -70,6 +80,7 @@ public class MainActivity extends Activity {
         log.setPadding(0, 32, 0, 0);
         v.addView(help);
         v.addView(floatBtn);
+        v.addView(budsBtn);
         v.addView(test);
         v.addView(updBtn);
         v.addView(log);
@@ -98,6 +109,8 @@ public class MainActivity extends Activity {
 
     private void refresh() {
         floatBtn.setText(FloatService.running ? "Hide floating PTT button" : "Show floating PTT button");
+        budsBtn.setText(getSharedPreferences("float", MODE_PRIVATE).getBoolean("buds", false)
+                ? "Earbud tap PTT: ON (tap = TX on/off)" : "Earbud tap PTT: OFF");
         log.setText("Recent:\n" + getSharedPreferences("log", MODE_PRIVATE).getString("lines", "(nothing yet)"));
     }
 }

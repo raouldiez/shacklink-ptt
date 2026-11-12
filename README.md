@@ -21,6 +21,14 @@ like holding the floating button, and the button turns red while you talk. Unplu
 while keyed un-keys at once, and the same 3-minute limit applies. ShackLink in Chrome keeps using the
 controller's knobs at the same time.
 
+## Earbud tap PTT (Galaxy Buds, AirPods...)
+
+Turn on **Earbud tap PTT** in the app (off by default, because it takes over play/pause for music).
+While the floating button is shown, a single earbud tap toggles TX: one tap keys, the next tap
+un-keys. A double tap always un-keys. Earbuds can't send press-and-release, so this is a toggle, not
+hold-to-talk; the 3-minute limit still applies. If music from another app takes the buttons back,
+hide and show the floating button again. The app log shows each earbud key it receives.
+
 ## Updating
 
 Open ShackLink PTT and tap **Check for update**. It downloads the latest build from this repo's
