@@ -14,6 +14,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -41,6 +42,8 @@ public class FloatService extends Service {
     private TextView button;
     private boolean keyed = false;
     private MidiPtt midi;                                       // CTR2-MIDI PTT jack (USB MIDI)
+    private BudsPtt buds;                                       // earbud tap = TX toggle (optional)
+    private long keyedAt = 0;
 
     static boolean running = false;
 
@@ -178,8 +181,7 @@ public class FloatService extends Service {
         button.setOnTouchListener((v, e) -> {
             switch (e.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    keyed = true; paint();
-                    PttReceiver.talk(this, true);
+                    setKeyed(true);
                     return true;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
@@ -196,15 +198,34 @@ public class FloatService extends Service {
         // A USB MIDI controller's PTT switch (CTR2-MIDI key jack) keys exactly like holding the button.
         midi = new MidiPtt(this, down -> {
             if (down == keyed) return;
-            keyed = down; paint();
-            PttReceiver.talk(this, down);
+            setKeyed(down);
         });
         midi.start();
+
+        // Earbud tap toggles TX (opt-in in the app, since it takes over play/pause for music).
+        if (getSharedPreferences("float", MODE_PRIVATE).getBoolean("buds", false)) {
+            buds = new BudsPtt(this, new BudsPtt.Listener() {
+                @Override public void onToggle() {
+                    // after the 3-minute failsafe un-keyed Mumla, 'keyed' is stale: treat as off
+                    boolean on = keyed && SystemClock.elapsedRealtime() - keyedAt < PttReceiver.MAX_TX_MS;
+                    setKeyed(!on);
+                }
+                @Override public void onForceOff() { setKeyed(false); }
+            });
+            buds.start();
+        }
+    }
+
+    private void setKeyed(boolean down) {
+        keyed = down; paint();
+        if (down) keyedAt = SystemClock.elapsedRealtime();
+        PttReceiver.talk(this, down);
     }
 
     @Override
     public void onDestroy() {
         if (midi != null) { midi.stop(); midi = null; }
+        if (buds != null) { buds.stop(); buds = null; }
         if (keyed) { keyed = false; PttReceiver.talk(this, false); }   // never leave Mumla keyed
         if (root != null && wm != null) {
             try { wm.removeView(root); } catch (Exception ignored) {}
