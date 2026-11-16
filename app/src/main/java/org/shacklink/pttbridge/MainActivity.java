@@ -10,6 +10,7 @@ import android.provider.Settings;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.text.SimpleDateFormat;
@@ -47,7 +48,8 @@ public class MainActivity extends Activity {
                 + "Releasing the key un-keys; a 3-minute limit un-keys if a release is ever missed.\n\n"
                 + "No PTT key (e.g. Z Fold)? Use the floating PTT button: drag it by the grip on top, "
                 + "hold the round button to talk.\n\n"
-                + "CTR2-MIDI plugged in? While the floating button is shown, its PTT jack (note 20) keys Mumla too.\n\n"
+                + "CTR2-MIDI plugged in? While the floating button is shown, its PTT jack (note 20) keys Mumla too. "
+                + "Using the jack for a CW paddle? Untick the CTR2 box below so dits don't key Mumla.\n\n"
                 + "Earbud tap PTT (Galaxy Buds etc.): turn it on below. While the floating button is shown, "
                 + "one tap = TX on, next tap = TX off, double tap = always TX off.\n");
         floatBtn = new Button(this);
@@ -59,6 +61,11 @@ public class MainActivity extends Activity {
             if (FloatService.running) { FloatService.stop(this); FloatService.start(this); }  // apply now
             budsBtn.postDelayed(this::refresh, 300);
         });
+        CheckBox jackPtt = new CheckBox(this);
+        jackPtt.setText("CTR2 jack is a PTT switch (untick for a CW paddle)");
+        jackPtt.setChecked(midiPtt(this));
+        jackPtt.setOnCheckedChangeListener((cb, on) ->
+                getSharedPreferences("prefs", MODE_PRIVATE).edit().putBoolean("midiPtt", on).apply());
         Button test = new Button(this);
         test.setText("Hold to test (keys Mumla)");
         test.setOnTouchListener((btn, e) -> {
@@ -81,10 +88,16 @@ public class MainActivity extends Activity {
         v.addView(help);
         v.addView(floatBtn);
         v.addView(budsBtn);
+        v.addView(jackPtt);
         v.addView(test);
         v.addView(updBtn);
         v.addView(log);
         setContentView(v);
+    }
+
+    /** false when the CTR2 jack holds a CW paddle: note 20 is then a dit, not PTT */
+    static boolean midiPtt(Context c) {
+        return c.getSharedPreferences("prefs", MODE_PRIVATE).getBoolean("midiPtt", true);
     }
 
     private void toggleFloat() {
