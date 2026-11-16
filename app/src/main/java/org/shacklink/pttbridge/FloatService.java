@@ -197,6 +197,7 @@ public class FloatService extends Service {
 
         // A USB MIDI controller's PTT switch (CTR2-MIDI key jack) keys exactly like holding the button.
         midi = new MidiPtt(this, down -> {
+            if (down && !MainActivity.midiPtt(this)) return;   // jack holds a CW paddle: a dit, not PTT
             if (down == keyed) return;
             setKeyed(down);
         });
